@@ -1,13 +1,13 @@
-
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
+from datetime import datetime
+import subprocess
 
 class BurgerOrderingSystem:
     def __init__(self, master):
         self.master = master
-        master.title("Dewmis Burger Order Funnel")
+        master.title("Burger Order Funnel")
 
         self.burgers = {
             "Classic Burger": {"price": 1200, "desc": "A classic beef burger with lettuce, tomato, and sauce", "calories": "300 kcal"},
@@ -27,14 +27,11 @@ class BurgerOrderingSystem:
 
     def create_widgets(self):
         burgers_list = list(self.burgers.items())
-        rows = 0  # Initialize row counter
-        columns = 5
 
         for index, (burger, details) in enumerate(burgers_list):
             # Create a frame for each burger
             burger_frame = ttk.Frame(self.master)
-           # burger_frame.grid(row=rows, column=index % 5, sticky='nsew', padx=5, pady=5)
-            burger_frame.grid(row=rows, column=index % columns, sticky='nsew', padx=5, pady=5)
+            burger_frame.grid(row=index // 5, column=index % 5, sticky='nsew', padx=5, pady=5)
 
             # Load and display the burger image
             image_path = f"images/{burger.lower().replace(' ', '_')}.png"
@@ -63,20 +60,17 @@ class BurgerOrderingSystem:
             add_button = ttk.Button(burger_frame, text="Add to Cart", command=lambda b=burger: self.add_to_cart(b))
             add_button.pack(side='top')
 
-            # Increment row index after every 5 burger
-            if index % columns == (columns - 1):
-                rows += 1
-
-        # Calculate the last row for the cart and checkout button, adjusting for the rows
-        last_row = rows + (1 if index % 5 == 3 else 2)
-
         # Cart label
         self.cart_label = ttk.Label(self.master, text="Cart: 0 items")
-        self.cart_label.grid(column=0, row=last_row, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        self.cart_label.grid(column=0, row=2, columnspan=5, sticky=tk.W, padx=5, pady=5)
+
+        # View Bill button
+        view_bill_button = ttk.Button(self.master, text="View Bill", command=self.view_bill)
+        view_bill_button.grid(column=0, row=3, columnspan=5, padx=5, pady=5)
 
         # Checkout button
         checkout_button = ttk.Button(self.master, text="Checkout", command=self.checkout)
-        checkout_button.grid(column=2, row=last_row, columnspan=2, padx=5, pady=5)
+        checkout_button.grid(column=0, row=4, columnspan=5, padx=5, pady=5)
 
     def add_to_cart(self, burger):
         self.cart.append(burger)
@@ -91,10 +85,32 @@ class BurgerOrderingSystem:
             messagebox.showinfo("Checkout", f"You have ordered: {ordered_items}")
             self.cart.clear()
             self.cart_label.configure(text="Cart: 0 items")
+            subprocess.run(["python", "payment.py"], check=True)
+
+
+    def view_bill(self):
+        if not self.cart:
+            messagebox.showinfo("View Bill", "Your cart is empty!")
+            return
+        
+        total_price = 0
+        total_calories = 0  # Initialize total calories
+        bill_text = f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        bill_text += "Item\t\tQty\tPrice\tCalories\tOrder Date\n"
+        for item in self.cart:
+            details = self.burgers[item]
+            price = details['price']
+            calories = int(details['calories'].split()[0])  # Extract calories as integer
+            total_calories += calories
+            total_price += price
+            order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            bill_text += f"{item}\t1\tLKR {price}\t{calories} kcal\t{order_date}\n"
+        
+        bill_text += f"\nTotal Calories: {total_calories} kcal\nTotal Price: LKR {total_price}"
+        messagebox.showinfo("View Bill", bill_text)
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = BurgerOrderingSystem(root)
-    root.geometry("1600x800")  # Adjust the window size as needed
+    root.geometry("1400x800")  # Adjust the window size as needed
     root.mainloop()
-
-                                                    

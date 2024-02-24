@@ -1,0 +1,13 @@
+Item Name,Unit Price,Quantity,Total Price
+sugar,400.0,8,3200.0
+Burger Patties,1000.0,52,100000.0
+Cheese,700.0,0,7000.0
+Lettuce leaves,800.0,0,1600.0
+Mayonnaise,400.0,12,4800.0
+Bacon slices,400.0,200,80000.0
+Chesse,1200.0,88,108000.0
+Chicken,1400.0,1000,1400000.0
+Ham baker,1600.0,400,640000.0
+
+Total Units,,1760,
+Total Inventory Value,,,2344600.0
